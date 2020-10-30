@@ -30,6 +30,7 @@ DocumentTypeDict = {
 "A31":"Agreed capacity",
 "A38":"Reserve allocation result document",
 "A44":"Price Document",
+"A59":"Status request for a status within a process",
 "A61":"Estimated Net Transfer Capacity",
 "A63":"Redispatch notice",
 "A65":"System total load",
@@ -165,3 +166,34 @@ AreaDict={
 "10Y1001A1001A869":"Ukraine-DobTPP CTA",
 "10YUA-WEPS-----0":"Ukraine BEI CTA",
 "10Y1001C--000182":"Ukraine IPS CTA"}
+
+#A.5. PsrType
+
+PsrTypeDict = {
+"A03":"Mixed",
+"A04":"Generation",
+"A05":"Load",
+"B01":"Biomass",
+"B02":"Fossil Brown coal/Lignite",
+"B03":"Fossil Coal-derived gas",
+"B04":"Fossil Gas",
+"B05":"Fossil Hard coal",
+"B06":"Fossil Oil",
+"B07":"Fossil Oil shale",
+"B08":"Fossil Peat",
+"B09":"Geothermal",
+"B10":"Hydro Pumped Storage",
+"B11":"Hydro Run-of-river and poundage",
+"B12":"Hydro Water Reservoir",
+"B13":"Marine",
+"B14":"Nuclear",
+"B15":"Other renewable",
+"B16":"Solar",
+"B17":"Waste",
+"B18":"Wind Offshore",
+"B19":"Wind Onshore",
+"B20":"Other",
+"B21":"AC Link",
+"B22":"DC Link",
+"B23":"Substation",
+"B24":"Transformer"}
