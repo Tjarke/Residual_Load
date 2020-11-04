@@ -1,24 +1,22 @@
-
 """
-Takes as input the url of an api requests to entso-e and then generates the corresponding csv-file 
+Download and save Data from Entso-e in "day-ahead" format as a csv file. Day-ahead means a data value for each 15 min of
+the day (96 values for every 24 hours)
+INPUT: URL for API request at Entso-e. All references for the data, such as country, load, generation, etc., has to be
+specified in the URL. Please refer to the notebook
+OUTPUT: csv files for the specified time horizon
 """
 
 import requests
 import pandas as pd
 import datetime
+import os
 from bs4 import BeautifulSoup as bs
-
-from Name_convention_dictionaries import DocumentTypeDict
-from Name_convention_dictionaries import ProcessTypeDict
-from Name_convention_dictionaries import AreaDict
-from Name_convention_dictionaries import PsrTypeDict
-from security_token import security_token
-
+from Name_convention_dictionaries import DocumentTypeDict, ProcessTypeDict, AreaDict, PsrTypeDict
 
 
 def Load_data_entsoe(url):
+
     ##### Load data and check status
-    
     response = requests.get(url)
     
     if response.status_code != requests.codes.ok:
@@ -110,7 +108,12 @@ def Load_data_entsoe(url):
     
         if end_datetime == end_datetime_initial:
             break
-    
+
+    ##### create a folder called data to store the data locally
+    folder_name = 'data'
+    if not os.path.exists(folder_name):
+        os.makedirs(folder_name)
+
     ##### Create a pandas dataframe and write a csv
     if soup.psrType:
         d = {'Date': date_col, PsrTypeDict[psrType]+" in "+measure_unit : value_col}
@@ -130,7 +133,9 @@ def Load_data_entsoe(url):
     
     if end_datetime_initial != end_datetime:
         print(f"\n\n\n\n Data was just loaded until {end_datetime} please have a look \n\n\n\n\n")#TODO figure out why sometimes it does not load all
-        
+
+
+### supporting functions to handle datetimes
 def convert_to_datetime(date_str):
     return datetime.datetime.strptime(date_str, '%Y-%m-%dT%H:%MZ')
 

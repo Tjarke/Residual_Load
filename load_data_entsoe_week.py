@@ -1,25 +1,23 @@
+"""
+Download and save Data from Entso-e in "week-ahead" format as a csv file. Week-ahead, means 2 values per each day of the
+week (the max and min value for each day). This means a total of 14 values for each week. This data format is only
+available for the load
+INPUT: URL for API request at Entso-e. All references for the data, such as country, load, generation, etc., has to be
+specified in the URL. Please refer to the notebook
+OUTPUT: csv files for the specified time horizon
+"""
+
 import requests
 import pandas as pd
 import datetime
+import os
 from bs4 import BeautifulSoup as bs
-
-# Import dictionaries and security_token
-
-from Name_convention_dictionaries import DocumentTypeDict, ProcessTypeDict,\
-AreaDict, PsrTypeDict
-
-# handle datetimes
-def convert_to_datetime(date_str):
-    return datetime.datetime.strptime(date_str, '%Y-%m-%dT%H:%MZ')
-
-def convert_from_date(date):
-    return datetime.datetime.strftime(date, "%Y-%m-%d_%H%M")
+from Name_convention_dictionaries import DocumentTypeDict, ProcessTypeDict, AreaDict, PsrTypeDict
 
 
-# create load week_ahead data function
 def load_data_week_ahead(url):
 
-    # load data and check status:
+    ##### load data and check status:
     response = requests.get(url)
 
     if response.status_code != requests.codes.ok:
@@ -79,12 +77,14 @@ def load_data_week_ahead(url):
         raise ValueError('Unexpected amount of time series')
 
     # create lists to store the data we will extract from the xml file using a loop
+    # four lists are required as for each day a min and a max value are given
     min_date_col = []
     max_date_col = []
     min_value_col = []
     max_value_col = []
 
     # create a logic statement to avoid extracting information more than once
+    # This is due to the structure of the raw data
     first = True
     second = True
 
@@ -122,6 +122,10 @@ def load_data_week_ahead(url):
             if start_datetime == start_datetime_initial:
                 break
 
+    ##### create a folder called data to store the data locally
+    folder_name = 'week_data'
+    if not os.path.exists(folder_name):
+        os.makedirs(folder_name)
 
     # Create a pandas dataframe and write a csv
     d = {'min_date': min_date_col,
@@ -131,7 +135,7 @@ def load_data_week_ahead(url):
     df = pd.DataFrame(d)
 
     path = 'Week_ahead_'+AreaDict[Zone]+"_"+convert_from_date(start_datetime_initial)+"to"+convert_from_date(end_datetime)+".csv"
-    df.to_csv(("./data/"+path),index=False)
+    df.to_csv(("./week_data/"+path),index=False)
     print("######################################################")
     print("Sucessfully saved to:")
     print(path)
@@ -141,3 +145,11 @@ def load_data_week_ahead(url):
         print(f"\n\n\n\n Data was just loaded until {end_datetime} please have a look \n\n\n\n\n")#TODO figure out why sometimes it does not load all
 
     return path
+
+
+### supporting functions to handle datetimes
+def convert_to_datetime(date_str):
+    return datetime.datetime.strptime(date_str, '%Y-%m-%dT%H:%MZ')
+
+def convert_from_date(date):
+    return datetime.datetime.strftime(date, "%Y-%m-%d_%H%M")
