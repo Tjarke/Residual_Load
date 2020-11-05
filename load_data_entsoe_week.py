@@ -15,7 +15,7 @@ from bs4 import BeautifulSoup as bs
 from Name_convention_dictionaries import DocumentTypeDict, ProcessTypeDict, AreaDict, PsrTypeDict
 
 
-def load_data_week_ahead(url):
+def Load_data_week_ahead(url):
 
     ##### load data and check status:
     response = requests.get(url)
@@ -123,7 +123,7 @@ def load_data_week_ahead(url):
                 break
 
     ##### create a folder called data to store the data locally
-    folder_name = 'week_data'
+    folder_name = 'data_week_ahead'
     if not os.path.exists(folder_name):
         os.makedirs(folder_name)
 
@@ -135,7 +135,7 @@ def load_data_week_ahead(url):
     df = pd.DataFrame(d)
 
     path = 'Week_ahead_'+AreaDict[Zone]+"_"+convert_from_date(start_datetime_initial)+"to"+convert_from_date(end_datetime)+".csv"
-    df.to_csv(("./week_data/"+path),index=False)
+    df.to_csv(("./"+folder_name+"/"+path),index=False)
     print("######################################################")
     print("Sucessfully saved to:")
     print(path)
