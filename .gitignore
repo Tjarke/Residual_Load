@@ -6,3 +6,4 @@ data_day_ahead
 data_week_ahead
 Day_ahead_dataset.csv
 Week_ahead_dataset.csv
+.DS_Store
