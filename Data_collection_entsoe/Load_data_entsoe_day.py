@@ -116,9 +116,9 @@ def Load_data_entsoe(url):
 
     ##### Create a pandas dataframe and write a csv
     if soup.psrType:
-        d = {'Date': date_col, ProcessTypeDict[processType]+"/"+PsrTypeDict[psrType]+" in "+measure_unit : value_col}
+        d = {'Date': date_col, ProcessTypeDict[processType]+"_"+PsrTypeDict[psrType]+"_in_"+measure_unit : value_col}
     else:
-        d = {'Date': date_col, ProcessTypeDict[processType]+"/"+DocumentTypeDict[DocType]+" in "+measure_unit : value_col}
+        d = {'Date': date_col, ProcessTypeDict[processType]+"_"+DocumentTypeDict[DocType]+"_in_"+measure_unit : value_col}
     df = pd.DataFrame(d)
 
     if soup.psrType:
