@@ -7,4 +7,7 @@ Data_collection_entsoe/Day_ahead_dataset.csv
 Data_collection_entsoe/Week_ahead_dataset.csv
 Data_collection_entsoe/Complete_daily_data.csv
 Data_collection_entsoe/.DS_Store
+Data_collection_weather/data_weather
+Data_collection_weather/security_key.py
+Data_collection_weather/.DS_Store
 .DS_Store
