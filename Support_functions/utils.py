@@ -45,8 +45,8 @@ def train_val_test_split(df, target_vars, val_days, test_days):
     print('The shape of the target variable for the validation set is: {}'.format(y_val.shape))
     print('--------------------------------------------')
 
-    X_test = df_features.iloc[X_val.shape[0]:]
-    y_test = df_target.iloc[y_val.shape[0]:]
+    X_test = df_features.iloc[X_val.shape[0]+X_train.shape[0]:]
+    y_test = df_target.iloc[y_val.shape[0]+X_train.shape[0]:]
     print('\n--------------------------------------------')
     print('The shape of the test set is: {}'.format(X_test.shape))
     print('The shape of the target variable for the test set is: {}'.format(y_test.shape))
