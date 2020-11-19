@@ -110,15 +110,15 @@ def get_model_metrics(y_true_with_date, y_prediction):
     y_true_list = list()
     y_pred_list = list()
 
-    df = pd.DataFrame({'date': time_stamp,
+    df = pd.DataFrame({'Date': time_stamp,
                        'y_true': y_true,
                        'y_pred': y_pred})
 
-    list_of_days = sorted(list(set(df.date.values)))
+    list_of_days = sorted(list(set(df.Date.values)))
 
     for day in list_of_days:
-        sub_df = df.query('date == @day')
-        date_list.append(sub_df.date.values)
+        sub_df = df.query('Date == @day')
+        date_list.append(sub_df.Date.values)
         y_true_list.append(sub_df.y_true.values)
         y_pred_list.append(sub_df.y_pred.values)
 
@@ -136,3 +136,33 @@ def get_model_metrics(y_true_with_date, y_prediction):
     print('----------------------------------------------\n')
 
     return df
+
+
+def iteratively_predict(model,X_test,n,name_of_naive_column="naive_System total load in MAW",suppress=True):
+    '''
+    This function will iteratively predict the next n timesteps for the complete test set. The test data should include a native prediction column.
+    The column will be overwritten in order to predict new values.
+    
+    input: the model that predicts
+           the test_features X_test
+           number of timesteps to predict n
+           name_of_naive_column= column containing the target with a 1 timestep lag
+           
+    output:
+        predictions of the model
+    '''
+    
+    X_test.reset_index(drop=True,inplace=True)
+    
+    y_p = np.array([])
+    for i in range(int(X_test.shape[0])-1):
+        if i%n == 0:
+            prediction = model.predict(X_test.iloc[i,:].to_numpy().reshape(1, -1))
+            y_p = np.append(y_p,prediction)
+            if not suppress:
+                print(f"predicted time period {i/n+1}")
+        else:
+            prediction = model.predict(X_test.iloc[i,:].to_numpy().reshape(1, -1))
+            X_test.loc[i+1,name_of_naive_column] = prediction
+            y_p = np.append(y_p,prediction)
+    return y_p
