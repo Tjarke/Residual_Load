@@ -65,22 +65,18 @@ def train_val_test_split(df, target_vars, val_days, test_days):
 
 def get_model_metrics(y_true_with_date, y_prediction):
 
-    # get the total error in MW
-
     y_true = np.array(y_true_with_date.iloc[:,1])
     y_pred = np.array(y_prediction)
 
-    total_pred = sum(y_pred)
-    total_true = sum(y_true)
-    absolute_error = total_true - total_pred
+
+    # get the total error and the overall MAE
+
+    overall_mae = mean_absolute_error(y_true, y_pred)
+    absolute_error = overall_mae * len(y_true)
 
     print('\n----------------------------------------------')
     print(f'The absolute error (total actual minus  forecast) in MW is: {round(absolute_error, 2)}')
     print('----------------------------------------------\n')
-
-    # get the overall MAE
-
-    overall_mae = mean_absolute_error(y_true, y_pred)
 
     print('\n----------------------------------------------')
     print(f'The overall mean absolute error of the model in MW is: {overall_mae}')
