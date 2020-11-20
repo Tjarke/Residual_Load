@@ -162,3 +162,25 @@ def iteratively_predict(model,X_test,n,name_of_naive_column="naive_System total 
             X_test.loc[i+1,name_of_naive_column] = prediction
             y_p = np.append(y_p,prediction)
     return y_p
+
+
+
+# Cyclical encoding of the Date! For our usecase we suggest using:
+# df = cyclical_encoder(df,1440,"minute")
+# df = cyclical_encoder(df,12,"month")
+# df = cyclical_encoder(df,7,"weekday")
+# df["Year"] = df["Date"].dt.year-2014
+
+
+def cyclical_encoder(df,T,time_period,Date_column="Date"):
+    '''
+    Take in a Datetime dataframe and return the same Dataframe that now includes the two cyclical encoded columns
+    '''
+    if time_period == "minutes":
+        df[("sin_"+time_period)] = np.sin((df.loc[:,Date_column].dt.hour*60 + df.loc[:,Date_column].dt.minute) * 2*np.pi/T)
+        df[("cos_"+time_period)] = np.sin((df.loc[:,Date_column].dt.hour*60 + df.loc[:,Date_column].dt.minute) * 2*np.pi/T)
+    else:
+        df[("sin_"+time_period)] = np.sin(getattr(df.loc[:,Date_column].dt,time_period) * 2*np.pi/T)
+        df[("cos_"+time_period)] = np.cos(getattr(df.loc[:,Date_column].dt,time_period) * 2*np.pi/T)
+    
+    return df
