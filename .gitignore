@@ -7,4 +7,7 @@ Data_collection_entsoe/Day_ahead_dataset.csv
 Data_collection_entsoe/Week_ahead_dataset.csv
 Data_collection_entsoe/Complete_daily_data.csv
 Data_collection_entsoe/.DS_Store
+__pycache__
+.idea
+.ipynb_checkpoints
 .DS_Store
