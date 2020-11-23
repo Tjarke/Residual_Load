@@ -12,3 +12,7 @@ Data_collection_weather/security_key.py
 Data_collection_weather/.DS_Store
 Feature_engineering/holidays_encoded.csv
 .DS_Store
+__pycache__
+.idea/
+.ipynb_checkpoints/
+.DS_Store
