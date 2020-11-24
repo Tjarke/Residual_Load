@@ -7,7 +7,18 @@ Data_collection_entsoe/Day_ahead_dataset.csv
 Data_collection_entsoe/Week_ahead_dataset.csv
 Data_collection_entsoe/Complete_daily_data.csv
 Data_collection_entsoe/.DS_Store
+<<<<<<< HEAD
 __pycache__
 .idea
 .ipynb_checkpoints
+=======
+Data_collection_weather/data_weather
+Data_collection_weather/security_key.py
+Data_collection_weather/.DS_Store
+Feature_engineering/holidays_encoded.csv
 .DS_Store
+__pycache__
+.idea/
+.ipynb_checkpoints/
+>>>>>>> 3aef9197e6b26ddc3fcab8a8d8c11146bc7fdaa6
+
