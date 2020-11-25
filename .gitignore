@@ -11,6 +11,8 @@ Data_collection_weather/data_weather
 Data_collection_weather/security_key.py
 Data_collection_weather/.DS_Store
 Feature_engineering/holidays_encoded.csv
+Feature_engineering/2020_09_EEGZubauwerte.xlsx
+Feature_engineering/renewable_power_plants_DE.csv
 .DS_Store
 __pycache__
 .idea/
