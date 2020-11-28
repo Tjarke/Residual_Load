@@ -7,6 +7,7 @@ Data_collection_entsoe/Day_ahead_dataset.csv
 Data_collection_entsoe/Week_ahead_dataset.csv
 Data_collection_entsoe/Complete_daily_data.csv
 Data_collection_entsoe/.DS_Store
+<<<<<<< HEAD
 Data_collection_weather/data_weather
 Data_collection_weather/security_key.py
 Data_collection_weather/.DS_Store
@@ -17,4 +18,9 @@ Feature_engineering/renewable_power_plants_DE.csv
 __pycache__
 .idea/
 .ipynb_checkpoints/
+=======
+__pycache__
+.idea
+.ipynb_checkpoints
+>>>>>>> 2b86e509b830ac3e26cbe2cf21b3cc9c28aa4dd9
 .DS_Store

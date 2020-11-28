@@ -65,22 +65,18 @@ def train_val_test_split(df, target_vars, val_days, test_days):
 
 def get_model_metrics(y_true_with_date, y_prediction):
 
-    # get the total error in MW
-
     y_true = np.array(y_true_with_date.iloc[:,1])
     y_pred = np.array(y_prediction)
 
-    total_pred = sum(y_pred)
-    total_true = sum(y_true)
-    absolute_error = total_true - total_pred
+
+    # get the total error and the overall MAE
+
+    overall_mae = mean_absolute_error(y_true, y_pred)
+    absolute_error = overall_mae * len(y_true)
 
     print('\n----------------------------------------------')
     print(f'The absolute error (total actual minus  forecast) in MW is: {round(absolute_error, 2)}')
     print('----------------------------------------------\n')
-
-    # get the overall MAE
-
-    overall_mae = mean_absolute_error(y_true, y_pred)
 
     print('\n----------------------------------------------')
     print(f'The overall mean absolute error of the model in MW is: {overall_mae}')
@@ -110,15 +106,15 @@ def get_model_metrics(y_true_with_date, y_prediction):
     y_true_list = list()
     y_pred_list = list()
 
-    df = pd.DataFrame({'date': time_stamp,
+    df = pd.DataFrame({'Date': time_stamp,
                        'y_true': y_true,
                        'y_pred': y_pred})
 
-    list_of_days = sorted(list(set(df.date.values)))
+    list_of_days = sorted(list(set(df.Date.values)))
 
     for day in list_of_days:
-        sub_df = df.query('date == @day')
-        date_list.append(sub_df.date.values)
+        sub_df = df.query('Date == @day')
+        date_list.append(sub_df.Date.values)
         y_true_list.append(sub_df.y_true.values)
         y_pred_list.append(sub_df.y_pred.values)
 
@@ -135,4 +131,56 @@ def get_model_metrics(y_true_with_date, y_prediction):
     print('This function also returns a dataframe with the MAE for each day')
     print('----------------------------------------------\n')
 
+    return df
+
+
+def iteratively_predict(model,X_test,n,name_of_naive_column="naive_System total load in MAW",suppress=True):
+    '''
+    This function will iteratively predict the next n timesteps for the complete test set. The test data should include a native prediction column.
+    The column will be overwritten in order to predict new values.
+    
+    input: the model that predicts
+           the test_features X_test
+           number of timesteps to predict n
+           name_of_naive_column= column containing the target with a 1 timestep lag
+           
+    output:
+        predictions of the model
+    '''
+    
+    X_test.reset_index(drop=True,inplace=True)
+    
+    y_p = np.array([])
+    for i in range(int(X_test.shape[0])-1):
+        if i%n == 0:
+            prediction = model.predict(X_test.iloc[i,:].to_numpy().reshape(1, -1))
+            y_p = np.append(y_p,prediction)
+            if not suppress:
+                print(f"predicted time period {i/n+1}")
+        else:
+            prediction = model.predict(X_test.iloc[i,:].to_numpy().reshape(1, -1))
+            X_test.loc[i+1,name_of_naive_column] = prediction
+            y_p = np.append(y_p,prediction)
+    return y_p
+
+
+
+# Cyclical encoding of the Date! For our usecase we suggest using:
+# df = cyclical_encoder(df,1440,"minute")
+# df = cyclical_encoder(df,12,"month")
+# df = cyclical_encoder(df,7,"weekday")
+# df["Year"] = df["Date"].dt.year-2014
+
+
+def cyclical_encoder(df,T,time_period,Date_column="Date"):
+    '''
+    Take in a Datetime dataframe and return the same Dataframe that now includes the two cyclical encoded columns
+    '''
+    if time_period == "minutes":
+        df[("sin_"+time_period)] = np.sin((df.loc[:,Date_column].dt.hour*60 + df.loc[:,Date_column].dt.minute) * 2*np.pi/T)
+        df[("cos_"+time_period)] = np.sin((df.loc[:,Date_column].dt.hour*60 + df.loc[:,Date_column].dt.minute) * 2*np.pi/T)
+    else:
+        df[("sin_"+time_period)] = np.sin(getattr(df.loc[:,Date_column].dt,time_period) * 2*np.pi/T)
+        df[("cos_"+time_period)] = np.cos(getattr(df.loc[:,Date_column].dt,time_period) * 2*np.pi/T)
+    
     return df
