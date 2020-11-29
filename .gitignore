@@ -13,6 +13,9 @@ Data_collection_weather/.DS_Store
 Feature_engineering/holidays_encoded.csv
 Feature_engineering/2020_09_EEGZubauwerte.xlsx
 Feature_engineering/renewable_power_plants_DE.csv
+Feature_engineering/Installed_capacities_time.csv
+Feature_engineering/Installed_capacities_with_geo.csv
+Feature_engineering/Solar_capacity_2020.csv
 .DS_Store
 __pycache__
 .idea/
