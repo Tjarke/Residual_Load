@@ -184,3 +184,60 @@ def cyclical_encoder(df,T,time_period,Date_column="Date"):
         df[("cos_"+time_period)] = np.cos(getattr(df.loc[:,Date_column].dt,time_period) * 2*np.pi/T)
     
     return df
+
+
+## feature engineering for weather data
+
+
+
+def create_feature_channels(df,stations,lat_steps,lon_steps,features,fillvalue=np.nan):
+    '''
+    This function will create "Pictures" where the pictures of the image correspond to the geographical location based on latitude and longitude 
+    The value of each pixel corresponst to the value of the feature for that channel
+    
+    Parameters
+    ----------
+    df : TYPE
+        df containing the features for different tables, named according to our convention
+    stations : TYPE
+        a dataframe containing the id and latitude and longitude of the stations used
+    lat_steps : TYPE
+        amouunt indicates the amount of pixels in the y-direction
+    lon_steps : TYPE
+        amouunt indicates the amount of pixels in the x-direction
+    features : TYPE
+        a list of features we want to include as feature channels
+
+    Returns
+    -------
+    a 4d tensor, the first 2 dimensions are the lat and lon, the 3rd dimension corresponds to the feature channels, and the fourth is time
+
+    '''
+    lat_range = [47.3,55]
+    lon_range = [5.625,15]
+    stepsize_lat = (lat_range[-1]-lat_range[0])/(lat_steps-1)
+    stepsize_lon = (lon_range[-1]-lon_range[0])/(lon_steps-1)
+    
+    amount_of_features = len(features)    
+    time_steps = df.shape[0]    
+    feature_channels = np.zeros((lat_steps,lon_steps,amount_of_features,time_steps),"float32")*fillvalue()
+    
+    for i in range(lat_steps):
+        for j in range(lon_steps):
+            lat_sub = [lat_range[0]+stepsize_lat*i,lat_range[0]+stepsize_lat*(i+1)]
+            lon_sub = [lon_range[0]+stepsize_lon*j,lon_range[0]+stepsize_lon*(j+1)]
+            
+    
+            select_stations = (stations.latitude > lat_sub[0]) & (stations.latitude <= lat_sub[1]) \
+                                &(stations.longitude > lon_sub[0]) & (stations.longitude <= lon_sub[1])
+            station_string = ""
+            for k in stations.loc[select_stations,"id"]:
+                station_string += k +"|"
+    
+            for cnt,l in enumerate(features):
+                if (len(station_string)>1):
+                    if (df.filter(regex=station_string[:-1]).filter(regex=l).shape[1]>0):
+                        feature_channels[i,j,cnt,:] = df.filter(regex=station_string[:-1]).filter(regex=l).mean(axis=1)
+
+    
+    return feature_channels
