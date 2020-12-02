@@ -7,23 +7,33 @@ Data_collection_entsoe/Day_ahead_dataset.csv
 Data_collection_entsoe/Week_ahead_dataset.csv
 Data_collection_entsoe/Complete_daily_data.csv
 Data_collection_entsoe/.DS_Store
-<<<<<<< HEAD
 Data_collection_weather/data_weather
 Data_collection_weather/security_key.py
 Data_collection_weather/.DS_Store
+Data_collection_weather/feature_channel_14x10.npy
+Data_collection_weather/feature_channel_16x10.npy
+Data_collection_weather/feature_channel_16x16.npy
+Data_collection_weather/feature_channel_28x20.npy
+Data_collection_weather/feature_channel_32x20.npy
+Data_collection_weather/feature_channel_56x40.npy
+Data_collection_weather/feature_channel_64x40.npy
 Feature_engineering/holidays_encoded.csv
 Feature_engineering/2020_09_EEGZubauwerte.xlsx
 Feature_engineering/renewable_power_plants_DE.csv
 Feature_engineering/Installed_capacities_time.csv
 Feature_engineering/Installed_capacities_with_geo.csv
 Feature_engineering/Solar_capacity_2020.csv
+Feature_engineering/installed_capacities_14x10.npy
+Feature_engineering/installed_capacities_16x10.npy
+Feature_engineering/installed_capacities_16x16.npy
+Feature_engineering/installed_capacities_28x20.npy
+Feature_engineering/installed_capacities_32x20.npy
+Feature_engineering/installed_capacities_56x40.npy
 .DS_Store
 __pycache__
 .idea/
 .ipynb_checkpoints/
-=======
 __pycache__
 .idea
 .ipynb_checkpoints
->>>>>>> 2b86e509b830ac3e26cbe2cf21b3cc9c28aa4dd9
 .DS_Store
