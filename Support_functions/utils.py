@@ -139,18 +139,18 @@ def iteratively_predict(model,X_test,n,name_of_naive_column="naive_System total 
     '''
     This function will iteratively predict the next n timesteps for the complete test set. The test data should include a native prediction column.
     The column will be overwritten in order to predict new values.
-    
+
     input: the model that predicts
            the test_features X_test
            number of timesteps to predict n
            name_of_naive_column= column containing the target with a 1 timestep lag
-           
+
     output:
         predictions of the model
     '''
-    
+
     X_test.reset_index(drop=True,inplace=True)
-    
+
     y_p = np.array([])
     for i in range(int(X_test.shape[0])-1):
         if i%n == 0:
@@ -165,6 +165,9 @@ def iteratively_predict(model,X_test,n,name_of_naive_column="naive_System total 
     return y_p
 
 
+################################################################################
+############################## DATA PREPROCESSING ##############################
+################################################################################
 
 # Cyclical encoding of the Date! For our usecase we suggest using:
 # df = cyclical_encoder(df,1440,"minute")
@@ -183,7 +186,7 @@ def cyclical_encoder(df,T,time_period,Date_column="Date"):
     else:
         df[("sin_"+time_period)] = np.sin(getattr(df.loc[:,Date_column].dt,time_period) * 2*np.pi/T)
         df[("cos_"+time_period)] = np.cos(getattr(df.loc[:,Date_column].dt,time_period) * 2*np.pi/T)
-    
+
     return df
 
 
@@ -193,9 +196,9 @@ def cyclical_encoder(df,T,time_period,Date_column="Date"):
 
 def create_feature_channels(df,stations,lat_steps,lon_steps,features,fillvalue=np.nan):
     '''
-    This function will create "Pictures" where the pictures of the image correspond to the geographical location based on latitude and longitude 
+    This function will create "Pictures" where the pictures of the image correspond to the geographical location based on latitude and longitude
     The value of each pixel corresponst to the value of the feature for that channel
-    
+
     The input Parameters:
     ----------
     df : TYPE pandas dataframe
@@ -218,29 +221,29 @@ def create_feature_channels(df,stations,lat_steps,lon_steps,features,fillvalue=n
     lon_range = [5.625,15]
     stepsize_lat = (lat_range[-1]-lat_range[0])/(lat_steps-1)
     stepsize_lon = (lon_range[-1]-lon_range[0])/(lon_steps-1)
-    
-    amount_of_features = len(features)    
-    time_steps = df.shape[0]    
-    feature_channels = np.zeros((lat_steps,lon_steps,amount_of_features,time_steps),"float32")*fillvalue()
-    
+
+    amount_of_features = len(features)
+    time_steps = df.shape[0]
+    feature_channels = np.zeros((lat_steps,lon_steps,amount_of_features,time_steps),"float32")*fillvalue
+
     for i in range(lat_steps):
         for j in range(lon_steps):
             lat_sub = [lat_range[0]+stepsize_lat*i,lat_range[0]+stepsize_lat*(i+1)]
             lon_sub = [lon_range[0]+stepsize_lon*j,lon_range[0]+stepsize_lon*(j+1)]
-            
-    
+
+
             select_stations = (stations.latitude > lat_sub[0]) & (stations.latitude <= lat_sub[1]) \
                                 &(stations.longitude > lon_sub[0]) & (stations.longitude <= lon_sub[1])
             station_string = ""
             for k in stations.loc[select_stations,"id"]:
                 station_string += k +"|"
-    
+
             for cnt,l in enumerate(features):
                 if (len(station_string)>1):
                     if (df.filter(regex=station_string[:-1]).filter(regex=l).shape[1]>0):
                         feature_channels[i,j,cnt,:] = df.filter(regex=station_string[:-1]).filter(regex=l).mean(axis=1)
 
-    
+
     return feature_channels
 
 ### feature engineering for the installed capacity
@@ -249,7 +252,7 @@ def create_feature_channels_installed_capacity(df,date_column,lat_steps,lon_step
     '''
     This function takes as a dataframe containing the installed capacity in germany and returns a grid with feature channels
     Also see create_feature_channels
-    
+
     The input Parameters:
     ----------
     df : TYPE pandas dataframe
@@ -276,26 +279,23 @@ def create_feature_channels_installed_capacity(df,date_column,lat_steps,lon_step
     df.loc[:,"commissioning_date"] = pd.to_datetime(df.loc[:,"commissioning_date"], format='%Y-%m-%d')
     df.loc[:,"decommissioning_date"].fillna("01.01.2055",inplace=True)
     df.loc[:,"decommissioning_date"] = pd.to_datetime(df.loc[:,"decommissioning_date"], format='%d.%m.%Y')
-    
+
     time_steps = date_column.shape[0]
     amount_of_features = len(features)
-    
+
     lat_range = [47.3,55]
     lon_range = [5.625,15]
-    
+
     stepsize_lat = (lat_range[-1]-lat_range[0])/(lat_steps-1)
     stepsize_lon = (lon_range[-1]-lon_range[0])/(lon_steps-1)
-    
+
 
     feature_channels = np.zeros((lat_steps,lon_steps,amount_of_features,time_steps),"float32")
-    
+
     start = time.time()
 
-
-
-
     df_dict = {}
-    
+
     for i in range(lat_steps):
         start_loop = time.time()
         df_dict[i] = {}
@@ -303,38 +303,124 @@ def create_feature_channels_installed_capacity(df,date_column,lat_steps,lon_step
             df_dict[i][j] = {}
             lat_sub = [lat_range[0]+stepsize_lat*i,lat_range[0]+stepsize_lat*(i+1)]
             lon_sub = [lon_range[0]+stepsize_lon*j,lon_range[0]+stepsize_lon*(j+1)]
-    
+
             for cnt,l in enumerate(features):
                 select_stations = (df.lat > lat_sub[0]) & (df.lat <= lat_sub[1]) \
                                   &(df.lon > lon_sub[0]) & (df.lon <= lon_sub[1]) \
                                   &(df.energy_source_level_2 == l)
-    
+
                 df_dict[i][j][l] = df.loc[select_stations,["electrical_capacity","commissioning_date","decommissioning_date"]]
         end_loop = time.time()
         if not suppress:
             print(f"The loop took {round(end_loop - start_loop,2)}s step {i+1} out of {lat_steps}")
-    if not suppress:                
+    if not suppress:
         end = time.time()
         print(f"Creating the dictionary took {round(end - start,2)}s")
-    
-    for t in range(int(time_steps/time_res)-1):
+
+    for t in range(int(time_steps/time_res)):
         start_loop = time.time()
-        date = date_column.iloc[time_res*t]
+        date = date_column.iloc[time_res*(t)]
         for i in range(lat_steps):
             for j in range(lon_steps):
                 for cnt,l in enumerate(features):
                     if df_dict[i][j][l].shape[0] > 0:
                         select_stations = (df_dict[i][j][l].commissioning_date <= date) \
-                                           & (df_dict[i][j][l].decommissioning_date > date) 
+                                           & (df_dict[i][j][l].decommissioning_date > date)
                         feature_channels[i,j,cnt,time_res*t:time_res*(t+1)] = df_dict[i][j][l].loc[select_stations,"electrical_capacity"].sum()
                     else:
                         feature_channels[i,j,cnt,time_res*t:time_res*(t+1)] = 0
         if not suppress:
             end_loop = time.time()
-            print(f"the loop took{round(end_loop - start_loop,2)} , step {t} of {int(time_steps/time_res)-1}")
+            print(f"the loop took{round(end_loop - start_loop,2)} , step {t} of {int(time_steps/time_res)}")
+
+    # append the last day (96 values) to the array
+    for i in range(lat_steps):
+        for j in range(lon_steps):
+            for cnt,l in enumerate(features):
+                if df_dict[i][j][l].shape[0] > 0:
+                    select_stations = (df_dict[i][j][l].commissioning_date <= date_column.iloc[-1]) \
+                                       & (df_dict[i][j][l].decommissioning_date > date_column.iloc[-1])
+                    feature_channels[i,j,cnt,time_res*(-1):] = df_dict[i][j][l].loc[select_stations,"electrical_capacity"].sum()
+                else:
+                    feature_channels[i,j,cnt,time_res*(-1):] = 0
 
     if not suppress:
         end = time.time()
         print(f"Creating the feature channels took {round(end - start,2)}s")
-    
+
     return feature_channels
+
+
+def min_max_normalize_weather(df, cols_to_not_normalize):
+    '''
+    This function normalize the specified columns in a dataframe containing the
+    weather data, it uses the min-max method to squeeze all values between 0 and 1
+
+    The input Parameters:
+    ----------
+    df : TYPE pandas dataframe
+        Dataframe containing the weather data for Germany
+    cols_to_not_normalize : TYPE list
+        List containing the name of the columns that should not be normalized
+
+    Returns
+    -------
+    df_normalized : Dataframe with normalized values (for the desired columns)
+    '''
+    # fix the min and max according to phisical properties:
+    feature_range_dict = dict()
+    feature_range_dict['temp'] = [-50, 50] # highest temperatures ever recorded in germany
+    feature_range_dict['rhum'] = [0, 110]
+    feature_range_dict['prcp'] = [0, 350]
+    feature_range_dict['wdir'] = [0, 360]
+    feature_range_dict['wspd'] = [0, 200]
+    feature_range_dict['pres'] = [0, 2000]
+    feature_range_dict['tsun'] = [0, 60]
+
+    cols = df.drop(columns=cols_to_not_normalize).columns
+
+    for col in cols:
+        X_min = feature_range_dict[col[-4:]][0]
+        X_max = feature_range_dict[col[-4:]][1]
+
+        df[col] = (df[col] - X_min)/(X_max - X_min)
+
+    return df_normalized
+
+
+def min_max_normalize_installed_capacity(df, cols_to_not_normalize):
+    '''
+    This function normalize the specified columns in a dataframe containing the
+    installed capacity data, it uses the min-max method to squeeze all values
+    between 0 and 1
+
+    IMPORTANT: Because of the format of the dataframe for installed capacities,
+    it is necessary to create a dataframe only for solar and one only for wind.
+    Each one should be normalized separately
+
+    The input Parameters:
+    ----------
+    df : TYPE pandas dataframe
+        Dataframe containing the information regarding all installed capacities
+        in Germany
+    cols_to_not_normalize : TYPE list
+        List containing the name of the columns that should not be normalized
+
+    Returns
+    -------
+    df_normalized : Dataframe with normalized values (for the desired columns)
+    '''
+    # fix the min and max according to phisical properties:
+    feature_range_dict = dict()
+    feature_range_dict['Solar'] = [0, 100000] # total capacity (all energy types) in Germany is around. 200 GW
+    feature_range_dict['Wind'] = [0, 100000]
+
+    cols = df.drop(columns=cols_to_not_normalize).columns
+
+    for col in cols:
+        X_min = feature_range_dict[df.energy_source_level_2.iloc[0]][0]
+        X_max = feature_range_dict[df.energy_source_level_2.iloc[0]][1]
+
+        df[col] /= X_max
+
+    return df_normalized
